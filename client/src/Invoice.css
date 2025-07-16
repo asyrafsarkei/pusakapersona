@@ -1,0 +1,83 @@
+.invoice-list .card {
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.invoice-list .card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.invoice-list .card-title {
+  color: #333;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.invoice-list .card-text strong {
+  color: #555;
+}
+
+.invoice-list .btn {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.invoice-list .btn-info {
+  background-color: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+.invoice-list .btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+.invoice-list .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.invoice-list .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-select:disabled,
+.form-control:disabled {
+  background-color: #e9ecef;
+  opacity: 1;
+}
+
+.card.p-3.bg-light {
+  background-color: #f8f9fa !important;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+}
+
+.card.p-3.bg-light h6 {
+  color: #007bff;
+  margin-bottom: 0.75rem;
+}
+
+.card.p-3.bg-light p {
+  margin-bottom: 0.25rem;
+}
+
+.card.p-3.bg-light ul {
+  padding-left: 0;
+}
+
+.card.p-3.bg-light .list-group-item {
+  border: none;
+  padding: 0.5rem 0;
+  background-color: transparent;
+}
+
+.card.p-3.bg-light .list-group-item:last-child {
+  border-bottom: none;
+}

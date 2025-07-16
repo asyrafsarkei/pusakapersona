@@ -1,0 +1,102 @@
+
+.menu-container {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.menu-container.top-menu {
+  flex-direction: row;
+}
+
+.menu-container.side-menu {
+  flex-direction: column;
+  position: fixed;
+  left: 2rem;
+  top: 2rem;
+  height: calc(100vh - 4rem);
+  justify-content: flex-start;
+  padding-top: 2rem;
+  width: 200px; /* Adjust as needed */
+}
+
+.menu-container.side-menu .toggle-btn {
+  margin-bottom: 2rem;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.top-menu .menu-list {
+  flex-direction: row;
+}
+
+.side-menu .menu-list {
+  flex-direction: column;
+  width: 100%;
+}
+
+.menu-list li {
+  margin: 0 1rem;
+}
+
+.side-menu .menu-list li {
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.menu-list a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.menu-list a:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #6a82fb;
+}
+
+.toggle-btn {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.welcome-message-top {
+  margin-left: auto; /* Pushes it to the right */
+  font-weight: 600;
+  color: #333;
+}
+
+.welcome-message-side {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;
+}
