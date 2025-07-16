@@ -1,0 +1,166 @@
+
+body {
+  background-image: url('/nature.JPG'); /* Path relative to the public folder */
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center center;
+  font-family: 'Corbel', sans-serif; /* Default font for body */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align to top */
+  padding: 2rem;
+  margin: 0;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1140px;
+  margin-top: 0.5rem;
+}
+
+.main-content-area {
+  flex-grow: 1;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content-area.shifted {
+  margin-left: 220px; /* Adjust based on sidebar width + padding */
+}
+
+.content-container {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  padding: 2.5rem;
+}
+
+h1 {
+  font-family: 'Calibri Light', 'Calibri', sans-serif; /* Specific font for H1 */
+  color: #333;
+  font-weight: 300; /* Light weight for Calibri Light */
+  margin-bottom: 2rem;
+}
+
+/* Apply Corbel to relevant elements */
+p, small, label, input, textarea, li, select, button {
+  font-family: 'Corbel', sans-serif;
+}
+
+.input-group .form-control {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0.75rem 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #333;
+}
+
+.input-group .form-control::placeholder {
+  color: #666;
+}
+
+.input-group .btn-primary {
+  background-color: #6a82fb;
+  border-color: #6a82fb;
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.input-group .btn-primary:hover {
+  background-color: #4a69f7;
+  border-color: #4a69f7;
+}
+
+.btn-add-new {
+  background-color: #7AD6F7; /* Custom color for Add New buttons */
+  border-color: #7AD6F7;
+  color: #333; /* Adjust text color for contrast */
+}
+
+.btn-add-new:hover {
+  background-color: #5ac0e6; /* Darker shade on hover */
+  border-color: #5ac0e6;
+}
+
+.message-list {
+  margin-top: 2rem;
+}
+
+.message-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.message-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.message-card .card-body {
+  padding: 1.25rem;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.message-card span {
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+
+.message-card .btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-outline-secondary {
+  color: #555;
+  border-color: #555; /* Match border to text color */
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6a82fb;
+  color: white;
+  border-color: #6a82fb;
+}
+
+.btn-outline-secondary.delete-btn {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-secondary.delete-btn:hover {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
