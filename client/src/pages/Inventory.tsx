@@ -9,6 +9,7 @@ interface InventoryItem {
   quantity: number;
   price: number | ''; // Allow empty string for placeholder
   description: string;
+  consume_flag: number; // 1 for consumable, 0 for non-consumable
   timestamp: string;
   created_by_username?: string; // New field
   last_modified_by_username?: string; // New field
@@ -23,6 +24,7 @@ function Inventory() {
     quantity: 0,
     price: '',
     description: '',
+    consume_flag: 1, // Default to consumable
     timestamp: '',
   });
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
@@ -44,15 +46,27 @@ function Inventory() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'quantity' || name === 'price' ? (value === '' ? '' : Number(value)) : value,
-    }));
+    if (e.target instanceof HTMLInputElement) {
+      const target = e.target as HTMLInputElement; // Explicitly cast to HTMLInputElement
+      if (target.type === 'checkbox') {
+        setFormData(prev => ({ ...prev, [name]: target.checked ? 1 : 0 }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          [name]: name === 'quantity' || name === 'price' ? (value === '' ? '' : Number(value)) : value,
+        }));
+      }
+    } else if (e.target instanceof HTMLTextAreaElement) {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.item_name || !formData.quantity || !formData.price) {
+    if (formData.item_name === '' || isNaN(formData.quantity) || (formData.price === '' || isNaN(Number(formData.price)))) {
       alert('Item Name, Quantity, and Price are required.');
       return;
     }
@@ -71,6 +85,7 @@ function Inventory() {
         quantity: 0,
         price: '',
         description: '',
+        consume_flag: 1, // Default to consumable
         timestamp: '',
       });
       setEditingItem(null);
@@ -105,6 +120,7 @@ function Inventory() {
       quantity: 0,
       price: '',
       description: '',
+      consume_flag: 1, // Default to consumable
       timestamp: '',
     });
   };
@@ -151,6 +167,10 @@ function Inventory() {
             <div className="mb-3">
               <label htmlFor="description" className="form-label">Description</label>
               <textarea className="form-control" id="description" name="description" value={formData.description} onChange={handleChange}></textarea>
+            </div>
+            <div className="mb-3 form-check">
+              <input type="checkbox" className="form-check-input" id="consume_flag" name="consume_flag" checked={formData.consume_flag === 1} onChange={handleChange} />
+              <label className="form-check-label" htmlFor="consume_flag">Consumable Item (Quantity reduces on order)</label>
             </div>
             <button type="submit" className="btn btn-primary">{editingItem ? 'Update Item' : 'Add Item'}</button>
             {editingItem && <button type="button" className="btn btn-secondary ms-2" onClick={handleCloseForm}>Cancel</button>}

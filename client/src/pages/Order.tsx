@@ -24,6 +24,7 @@ interface InventoryItem {
   item_name: string;
   quantity: number;
   price: number;
+  consume_flag: number; // Add consume_flag to InventoryItem interface
 }
 
 function Order() {
@@ -258,7 +259,7 @@ function Order() {
                 <select className="form-select" value={selectedInventoryItem} onChange={(e) => setSelectedInventoryItem(e.target.value)}>
                   <option value="">Select an item</option>
                   {inventoryItems.map(item => (
-                    <option key={item.id} value={item.id}>{item.item_name} (RM{item.price.toFixed(2)})</option>
+                    <option key={item.id} value={item.id}>{item.item_name} (RM{item.price.toFixed(2)}) {item.consume_flag === 1 ? '(Consumable)' : '(Non-Consumable)'}</option>
                   ))}
                 </select>
                 <input type="number" className="form-control" value={selectedQuantity} onChange={(e) => setSelectedQuantity(parseInt(e.target.value))} min="1" />

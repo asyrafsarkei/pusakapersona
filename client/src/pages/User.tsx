@@ -191,7 +191,7 @@ function User({ onLoginSuccess }: UserProps) {
 
   return (
     <div className="content-container">
-      <h1 className="mb-4 text-center">User Management</h1>
+      <h1 className="mb-4 text-center">Welcome to Pusaka Persona</h1>
 
       {!isAuthenticated && (
         <div className="card mb-4">

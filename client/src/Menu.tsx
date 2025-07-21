@@ -20,7 +20,7 @@ function Menu({ onToggleMenuPosition, username }: MenuProps) {
 
   return (
     <div className={`menu-container ${isSideMenu ? 'side-menu' : 'top-menu'}`}>
-      <button className="btn btn-secondary toggle-btn" onClick={toggleMenuPosition}>
+      <button className="btn btn-secondary toggle-btn" onClick={toggleMenuPosition} title="Toggle Menu Position">
         <FontAwesomeIcon icon={isSideMenu ? faArrowRight : faBars} /> {/* Changed icon here */}
       </button>
       {isSideMenu && username && <span className="welcome-message-side">Welcome, {username}!</span>} {/* Conditional rendering for side menu */}

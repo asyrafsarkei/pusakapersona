@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt, faPlus, faEye } from '@fortawesome/free-solid-svg-icons';
 import FloatingPanel from '../components/FloatingPanel';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface OrderItem {
   item_id: number;
@@ -379,6 +381,108 @@ function Invoice() {
     return matchesSearchTerm && matchesDateRange;
   });
 
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = async () => {
+    console.log('handlePrint called');
+    if (contentRef.current) {
+      console.log('contentRef.current is valid');
+      const input = contentRef.current;
+      const originalStatusDisplay = input.querySelector('#invoice-status-display');
+      const balanceDueDisplay = input.querySelector('#balance-due-display');
+      let originalBalanceDueText = '';
+
+      if (originalStatusDisplay) {
+        console.log('Hiding status display for print');
+        (originalStatusDisplay as HTMLElement).style.display = 'none';
+      }
+
+      if (balanceDueDisplay && currentInvoice?.is_paid_100_percent) {
+        originalBalanceDueText = balanceDueDisplay.textContent || '';
+        (balanceDueDisplay as HTMLElement).textContent = 'Fully Paid';
+      }
+
+      try {
+        console.log('Attempting to capture content with html2canvas');
+        const canvas = await html2canvas(input, { scale: 2 });
+        console.log('html2canvas capture complete. Canvas:', canvas);
+        const imgData = canvas.toDataURL('image/png');
+        console.log('Image data generated:', imgData.substring(0, 50) + '...'); // Log first 50 chars
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const margin = 12.7; // 0.5 inch in mm
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const usableWidth = pdfWidth - (2 * margin);
+        const usableHeight = pdfHeight - 60; // Account for header (45mm) and footer (15mm buffer)
+
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+
+        const widthRatio = usableWidth / imgWidth;
+        const heightRatio = usableHeight / imgHeight;
+        const ratio = Math.min(widthRatio, heightRatio);
+
+        const scaledWidth = imgWidth * ratio;
+        const scaledHeight = imgHeight * ratio;
+
+        // Add logo and company details
+        const logoImg = new Image();
+        logoImg.src = '/src/assets/Logo.png'; // Adjust path as necessary
+        console.log('Attempting to load logo image from:', logoImg.src);
+        await new Promise((resolve, reject) => {
+          logoImg.onload = () => {
+            console.log('Logo image loaded successfully');
+            resolve(null);
+          };
+          logoImg.onerror = (err) => {
+            console.error('Error loading logo image:', err);
+            reject(err);
+          };
+        });
+
+        pdf.addImage(logoImg, 'PNG', margin, 10, 30, 30); // x, y, width, height
+        pdf.setFontSize(12);
+        pdf.text("Pusaka Persona SDN BHD", margin + 35, 20); // Adjusted x for text
+        pdf.text("REG-NO XXXXXX", margin + 35, 26);
+        pdf.text("Phone Number :+6012-xxxxxxx", margin + 35, 32);
+
+        // Add a line to separate header from content
+        pdf.setLineWidth(0.5);
+        pdf.line(margin, 45, pdfWidth - margin, 45); // x1, y1, x2, y2
+
+        // Calculate x position to center the image horizontally
+        const imgX = margin + (usableWidth - scaledWidth) / 2;
+        const imgY = 50; // Start content below the header
+
+        pdf.addImage(imgData, 'PNG', imgX, imgY, scaledWidth, scaledHeight);
+
+        // Add bank information and T&C at the bottom
+        const textStartY = imgY + scaledHeight + 5; // Position below the scaled image
+        pdf.setFontSize(5);
+        pdf.text("Payment is refer to T&C agreement document signed.", imgX, textStartY);
+        pdf.text("Payment can be made to Account Holder Nur Syafiqah Said at XXXXXXXXXX (Maybank)", imgX, textStartY + 3);
+        pdf.text("This is computer generated invoice. No Signature required.", pdfWidth - margin, textStartY + 3, { align: 'right' });
+
+        pdf.save(`invoice_${currentInvoice?.invoice_number || 'details'}.pdf`);
+        console.log('PDF saved successfully');
+
+      } catch (error) {
+        console.error('Error during PDF generation:', error);
+      } finally {
+        if (originalStatusDisplay) {
+          console.log('Restoring status display');
+          (originalStatusDisplay as HTMLElement).style.display = ''; // Restore display
+        }
+        if (balanceDueDisplay && originalBalanceDueText !== '') {
+          (balanceDueDisplay as HTMLElement).textContent = originalBalanceDueText;
+        }
+      }
+    } else {
+      console.log('contentRef.current is null. Cannot generate PDF.');
+    }
+  };
+
   return (
     <div className="content-container">
       <h1 className="mb-4 text-center">Invoice Management</h1>
@@ -459,139 +563,144 @@ function Invoice() {
       {showPanel && (
         <FloatingPanel onClose={() => setShowPanel(false)} title={isViewing ? 'View Invoice' : (isEditing ? 'Edit Invoice' : 'Create New Invoice')}>
           <form onSubmit={handleSubmit}>
-            {/* Order Selection for new Invoices */}
-            {!isEditing && !isViewing && (
-              <div className="mb-3">
-                <label htmlFor="order_id" className="form-label">Select Order</label>
-                <select id="order_id" name="order_id" className="form-select" value={formData.order_id} onChange={handleOrderChange} required>
-                  <option value="">-- Choose an Order --</option>
-                  {orders.map(order => (
-                    <option key={order.id} value={order.id}>{order.title} - {order.customer_name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div id="invoice-content-to-print" ref={contentRef}>
+              {/* Order Selection for new Invoices */}
+              {!isEditing && !isViewing && (
+                <div className="mb-3">
+                  <label htmlFor="order_id" className="form-label">Select Order</label>
+                  <select id="order_id" name="order_id" className="form-select" value={formData.order_id} onChange={handleOrderChange} required>
+                    <option value="">-- Choose an Order --</option>
+                    {orders.map(order => (
+                      <option key={order.id} value={order.id}>{order.title} - {order.customer_name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-            {/* Customer and Order Details */}
-            {(formData.order_id || isViewing) && (
-              <div className="card mb-3">
-                <div className="card-header">Customer & Order Details</div>
-                <div className="card-body">
-                  <p><strong>Customer:</strong> {orderCustomerName}</p>
-                  <p><strong>Phone:</strong> {orderPhoneNumber}</p>
-                  <p><strong>Location:</strong> {orderLocation}</p>
+              {/* Customer and Order Details */}
+              {(formData.order_id || isViewing) && (
+                <div className="card mb-3">
+                  <div className="card-header">Customer & Order Details</div>
+                  <div className="card-body">
+                    <p><strong>Customer:</strong> {orderCustomerName}</p>
+                    <p><strong>Phone:</strong> {orderPhoneNumber}</p>
+                    <p><strong>Location:</strong> {orderLocation}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Invoice Form Fields */}
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="invoice_number" className="form-label">Invoice Number</label>
+                  <input type="text" id="invoice_number" name="invoice_number" className="form-control" value={formData.invoice_number} onChange={handleChange} required disabled={isViewing} />
+                </div>
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="date_invoice" className="form-label">Invoice Date</label>
+                  <input type="date" id="date_invoice" name="date_invoice" className="form-control" value={formData.date_invoice} onChange={handleChange} required disabled={isViewing} />
                 </div>
               </div>
-            )}
 
-            {/* Invoice Form Fields */}
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label htmlFor="invoice_number" className="form-label">Invoice Number</label>
-                <input type="text" id="invoice_number" name="invoice_number" className="form-control" value={formData.invoice_number} onChange={handleChange} required disabled={isViewing} />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="date_invoice" className="form-label">Invoice Date</label>
-                <input type="date" id="date_invoice" name="date_invoice" className="form-control" value={formData.date_invoice} onChange={handleChange} required disabled={isViewing} />
-              </div>
-            </div>
-
-            {/* Order Items Table */}
-            {orderItems.length > 0 && (
-              <div className="mb-3">
-                <h5>Order Items</h5>
-                <table className="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th className="text-end">Quantity</th>
-                      <th className="text-end">Price</th>
-                      <th className="text-end">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderItems.map(item => (
-                      <tr key={item.item_id}>
-                        <td>{item.item_name}</td>
-                        <td className="text-end">{item.quantity}</td>
-                        <td className="text-end">{formatCurrency(item.price)}</td>
-                        <td className="text-end">{formatCurrency(item.quantity * item.price)}</td>
+              {/* Order Items Table */}
+              {orderItems.length > 0 && (
+                <div className="mb-3">
+                  <h5>Order Items</h5>
+                  <table className="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th className="text-end">Quantity</th>
+                        <th className="text-end">Price</th>
+                        <th className="text-end">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <th colSpan={3} className="text-end">Items Total:</th>
-                      <th className="text-end">{formatCurrency(orderTotalItemsPrice)}</th>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )}
+                    </thead>
+                    <tbody>
+                      {orderItems.map(item => (
+                        <tr key={item.item_id}>
+                          <td>{item.item_name}</td>
+                          <td className="text-end">{item.quantity}</td>
+                          <td className="text-end">{formatCurrency(item.price)}</td>
+                          <td className="text-end">{formatCurrency(item.quantity * item.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th colSpan={3} className="text-end">Items Total:</th>
+                        <th className="text-end">{formatCurrency(orderTotalItemsPrice)}</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              )}
 
-            {/* Financial Details */}
-            <div className="row">
-              <div className="col-md-6 mb-3">
-                <label htmlFor="payment_method" className="form-label">Payment Method</label>
-                <select id="payment_method" name="payment_method" className="form-select" value={formData.payment_method} onChange={handleChange} required disabled={isViewing}>
-                  <option value="">-- Select --</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="delivery_charge" className="form-label">Delivery Charge (RM)</label>
-                <input type="text" id="delivery_charge" name="delivery_charge" className="form-control" value={formData.delivery_charge} onChange={handleChange} disabled={isViewing} />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="deposit_amount" className="form-label">Deposit Amount (RM)</label>
-                <input type="text" id="deposit_amount" name="deposit_amount" className="form-control" value={formData.deposit_amount} onChange={handleChange} disabled={isViewing} />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label htmlFor="upfront_payment" className="form-label">Upfront Payment (RM)</label>
-                <input type="text" id="upfront_payment" name="upfront_payment" className="form-control" value={formData.upfront_payment} onChange={handleChange} required disabled={isViewing} />
-              </div>
-            </div>
-
-            {/* Calculated Totals */}
-            <div className="alert alert-info">
+              {/* Financial Details */}
               <div className="row">
-                <div className="col-6"><strong>Total Amount:</strong></div>
-                <div className="col-6 text-end">{formatCurrency(calculateTotalAmount())}</div>
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="payment_method" className="form-label">Payment Method</label>
+                  <select id="payment_method" name="payment_method" className="form-select" value={formData.payment_method} onChange={handleChange} required disabled={isViewing}>
+                    <option value="">-- Select --</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Credit Card">Credit Card</option>
+                    
+                  </select>
+                </div>
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="delivery_charge" className="form-label">Delivery Charge (RM)</label>
+                  <input type="text" id="delivery_charge" name="delivery_charge" className="form-control" value={formData.delivery_charge} onChange={handleChange} disabled={isViewing} />
+                </div>
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="deposit_amount" className="form-label">Deposit Amount (RM)</label>
+                  <input type="text" id="deposit_amount" name="deposit_amount" className="form-control" value={formData.deposit_amount} onChange={handleChange} disabled={isViewing} />
+                </div>
+                <div className="col-md-6 mb-3">
+                  <label htmlFor="upfront_payment" className="form-label">Upfront Payment (RM)</label>
+                  <input type="text" id="upfront_payment" name="upfront_payment" className="form-control" value={formData.upfront_payment} onChange={handleChange} required disabled={isViewing} />
+                </div>
               </div>
-              <hr/>
-              <div className="row">
-                <div className="col-6"><strong>Balance Due:</strong></div>
-                <div className="col-6 text-end">{formatCurrency(calculateBalanceDue())}</div>
+
+              {/* Calculated Totals */}
+              <div className="alert alert-info">
+                <div className="row">
+                  <div className="col-6"><strong>Total Amount:</strong></div>
+                  <div className="col-6 text-end">{formatCurrency(calculateTotalAmount())}</div>
+                </div>
+                <hr/>
+                <div className="row">
+                  <div className="col-6"><strong>Balance Due:</strong></div>
+                  <div className="col-6 text-end" id="balance-due-display">{formatCurrency(calculateBalanceDue())}</div>
+                </div>
               </div>
+
+              {/* Paid 100% Checkbox (for editing) */}
+              {isEditing && (
+                <div className="form-check mb-3">
+                  <input
+                    type="checkbox"
+                    id="is_paid_100_percent"
+                    name="is_paid_100_percent"
+                    className="form-check-input"
+                    checked={formData.is_paid_100_percent}
+                    onChange={(e) => setFormData({ ...formData, is_paid_100_percent: e.target.checked })}
+                  />
+                  <label htmlFor="is_paid_100_percent" className="form-check-label">Mark as Fully Paid</label>
+                </div>
+              )}
+
+              {/* Status for Viewing (hidden during print) */}
+              {isViewing && (
+                <div id="invoice-status-display" className="alert alert-success text-center">
+                  <strong>Status: {formData.is_paid_100_percent ? 'Fully Paid' : 'Pending'}</strong>
+                </div>
+              )}
             </div>
-
-            {/* Paid 100% Checkbox (for editing) */}
-            {isEditing && (
-              <div className="form-check mb-3">
-                <input
-                  type="checkbox"
-                  id="is_paid_100_percent"
-                  name="is_paid_100_percent"
-                  className="form-check-input"
-                  checked={formData.is_paid_100_percent}
-                  onChange={(e) => setFormData({ ...formData, is_paid_100_percent: e.target.checked })}
-                />
-                <label htmlFor="is_paid_100_percent" className="form-check-label">Mark as Fully Paid</label>
-              </div>
-            )}
-
-            {/* Status for Viewing */}
-            {isViewing && (
-              <div className="alert alert-success text-center">
-                <strong>Status: {formData.is_paid_100_percent ? 'Fully Paid' : 'Pending'}</strong>
-              </div>
-            )}
 
             {/* Action Buttons */}
             <div className="d-flex justify-content-end">
+              {isViewing && (
+                <button type="button" className="btn btn-info me-2" onClick={handlePrint}>Print</button>
+              )}
               <button type="button" className="btn btn-secondary me-2" onClick={() => setShowPanel(false)}>Close</button>
               {!isViewing && (
                 <button type="submit" className="btn btn-primary">{isEditing ? 'Update Invoice' : 'Create Invoice'}</button>
