@@ -23,7 +23,7 @@ function App() {
   const checkAuth = useCallback(async (isLogin = false) => {
     console.log('Checking authentication status...');
     try {
-      const response = await axios.get('http://localhost:3001/api/current_user');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/current_user`);
       console.log('Current user response:', response.data);
       const authenticated = response.status === 200 && response.data.user;
       setIsAuthenticated(authenticated);

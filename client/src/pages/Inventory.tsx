@@ -37,7 +37,7 @@ function Inventory() {
 
   const fetchInventory = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/inventory');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/inventory`);
       setInventory(response.data.data);
     } catch (error) {
       console.error('Error fetching inventory:', error);
@@ -75,9 +75,9 @@ function Inventory() {
 
     try {
       if (editingItem) {
-        await axios.put(`http://localhost:3001/api/inventory/${editingItem.id}`, formData);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/inventory/${editingItem.id}`, formData);
       } else {
-        await axios.post('http://localhost:3001/api/inventory', formData);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/inventory`, formData);
       }
       setFormData({
         id: 0,
@@ -104,7 +104,7 @@ function Inventory() {
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3001/api/inventory/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/inventory/${id}`);
       fetchInventory();
     } catch (error) {
       console.error('Error deleting inventory item:', error);

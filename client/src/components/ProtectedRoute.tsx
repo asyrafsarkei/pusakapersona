@@ -14,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/current_user');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/current_user`);
         if (response.status === 200 && response.data.user) {
           setIsAuthenticated(true);
         } else {

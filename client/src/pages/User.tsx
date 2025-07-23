@@ -45,7 +45,7 @@ function User({ onLoginSuccess }: UserProps) {
   const checkAuthAndFetchUsers = async () => {
     console.log('User.tsx: Checking authentication status...');
     try {
-      const response = await axios.get('http://localhost:3001/api/current_user');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/current_user`);
       console.log('User.tsx: Current user response:', response.data);
       const authenticated = response.status === 200 && response.data.user;
       setIsAuthenticated(authenticated);
@@ -65,7 +65,7 @@ function User({ onLoginSuccess }: UserProps) {
   const fetchUsers = async () => {
     console.log('User.tsx: Fetching users...');
     try {
-      const response = await axios.get('http://localhost:3001/api/users');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`);
       console.log('User.tsx: Users fetched:', response.data);
       setUsers(response.data.data);
     } catch (error) {
@@ -93,7 +93,7 @@ function User({ onLoginSuccess }: UserProps) {
     try {
       if (isLogin) {
         // Login
-        const response = await axios.post('http://localhost:3001/api/login', { email: formData.email, password: formData.password });
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, { email: formData.email, password: formData.password });
         console.log('User.tsx: Login response:', response.data);
         setIsAuthenticated(true); // Update local state immediately
         setCurrentUser(response.data.user); // Set current user
@@ -101,7 +101,7 @@ function User({ onLoginSuccess }: UserProps) {
         navigate('/'); // Redirect to home page after successful login
       } else {
         // Register
-        const response = await axios.post('http://localhost:3001/api/register', { username: formData.username, email: formData.email, password: formData.password, manualRegisterKey });
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, { username: formData.username, email: formData.email, password: formData.password, manualRegisterKey });
         console.log('User.tsx: Register response:', response.data);
         alert(response.data.message);
         setIsLogin(true); // Switch to login after successful registration
@@ -123,7 +123,7 @@ function User({ onLoginSuccess }: UserProps) {
   const handleGoogleSignIn = () => {
     console.log('User.tsx: Initiating Google Sign-in');
     // Redirect to Google auth, App.tsx will handle the callback and call onLoginSuccess
-    window.location.href = 'http://localhost:3001/auth/google';
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
 
   const handleEdit = (user: UserItem) => {
@@ -132,7 +132,7 @@ function User({ onLoginSuccess }: UserProps) {
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3001/api/users/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/${id}`);
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -141,7 +141,7 @@ function User({ onLoginSuccess }: UserProps) {
 
   const handleApprove = async (id: number) => {
     try {
-      await axios.put(`http://localhost:3001/api/users/${id}/approve`);
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${id}/approve`);
       alert('User approved successfully!');
       fetchUsers();
     } catch (error) {
@@ -153,7 +153,7 @@ function User({ onLoginSuccess }: UserProps) {
   const handleLogout = async () => {
     console.log('User.tsx: Logging out...');
     try {
-      await axios.get('http://localhost:3001/api/logout');
+      await axios.get(`${import.meta.env.VITE_API_URL}/api/logout`);
       alert('Logged out successfully!');
       setIsAuthenticated(false);
       setCurrentUser(null);
@@ -174,7 +174,7 @@ function User({ onLoginSuccess }: UserProps) {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/api/admin/register', addUserFormData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/register`, addUserFormData);
       alert(response.data.message);
       setShowAddUserForm(false);
       fetchUsers();

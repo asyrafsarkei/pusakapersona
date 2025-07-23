@@ -51,10 +51,10 @@ function Order() {
 
   const fetchOrders = async () => {
     try {
-      const ordersResponse = await axios.get('http://localhost:3001/api/orders');
+      const ordersResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`);
       const ordersData = ordersResponse.data.data;
 
-      const invoicesResponse = await axios.get('http://localhost:3001/api/invoices');
+      const invoicesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/invoices`);
       const invoicesData = invoicesResponse.data.data;
 
       const ordersWithInvoiceStatus = ordersData.map((order: OrderItem) => {
@@ -81,7 +81,7 @@ function Order() {
 
   const fetchInventoryItems = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/inventory');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/inventory`);
       setInventoryItems(response.data.data);
     } catch (error) {
       console.error('Error fetching inventory items:', error);
@@ -123,9 +123,9 @@ function Order() {
 
     try {
       if (editingOrder) {
-        await axios.put(`http://localhost:3001/api/orders/${editingOrder.id}`, formData);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/${editingOrder.id}`, formData);
       } else {
-        await axios.post('http://localhost:3001/api/orders', formData);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/orders`, formData);
       }
       setFormData({
         title: '',
@@ -159,7 +159,7 @@ function Order() {
 
     if (window.confirm('Are you sure you want to delete this order?')) {
       try {
-        await axios.delete(`http://localhost:3001/api/orders/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/orders/${id}`);
         fetchOrders(); // Refresh the orders list
       } catch (error) {
         console.error('Error deleting order:', error);

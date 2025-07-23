@@ -98,12 +98,12 @@ function Invoice() {
 
   const fetchData = async () => {
     try {
-      const invoicesResponse = await axios.get('http://localhost:3001/api/invoices');
+      const invoicesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/invoices`);
       const invoicesData = invoicesResponse.data.data || [];
       console.log('Fetched invoices data:', invoicesData);
       setInvoices(invoicesData);
 
-      const ordersResponse = await axios.get('http://localhost:3001/api/orders');
+      const ordersResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders`);
       const allOrders = ordersResponse.data.data;
 
       const ordersWithInvoices = new Set(invoicesData.map((invoice: InvoiceItem) => invoice.order_id));
@@ -190,7 +190,7 @@ function Invoice() {
     console.log('Attempting to edit invoice with order_id:', invoice.order_id);
 
     try {
-      const orderResponse = await axios.get(`http://localhost:3001/api/orders/${invoice.order_id}`);
+      const orderResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/${invoice.order_id}`);
       const orderDetails = orderResponse.data.data;
 
       if (!orderDetails) {
@@ -244,7 +244,7 @@ function Invoice() {
     console.log('Attempting to view invoice with order_id:', invoice.order_id);
 
     try {
-      const orderResponse = await axios.get(`http://localhost:3001/api/orders/${invoice.order_id}`);
+      const orderResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/${invoice.order_id}`);
       const orderDetails = orderResponse.data.data;
 
       if (!orderDetails) {
@@ -317,10 +317,10 @@ function Invoice() {
     console.log('Submitting payload:', payload);
     try {
       if (isEditing && currentInvoice) {
-        await axios.put(`http://localhost:3001/api/invoices/${currentInvoice.id}`, payload);
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/invoices/${currentInvoice.id}`, payload);
         alert('Invoice updated successfully!');
       } else {
-        await axios.post('http://localhost:3001/api/invoices', payload);
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/invoices`, payload);
         alert('Invoice created successfully!');
       }
       setShowPanel(false);
@@ -338,7 +338,7 @@ function Invoice() {
     }
     if (window.confirm('Are you sure you want to delete this invoice?')) {
       try {
-        await axios.delete(`http://localhost:3001/api/invoices/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/invoices/${id}`);
         alert('Invoice deleted successfully!');
         fetchData(); // Refetch data after deletion
       } catch (error: any) {

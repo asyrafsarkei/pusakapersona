@@ -18,7 +18,7 @@ function Home() {
 
   const fetchMessages = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/messages');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/messages`);
       setMessages(response.data.data);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -31,7 +31,7 @@ function Home() {
 
     if (editingMessage) {
       try {
-        await axios.put(`http://localhost:3001/api/messages/${editingMessage.id}`, { text: newMessage });
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/messages/${editingMessage.id}`, { text: newMessage });
         setNewMessage('');
         setEditingMessage(null);
         fetchMessages();
@@ -40,7 +40,7 @@ function Home() {
       }
     } else {
       try {
-        await axios.post('http://localhost:3001/api/messages', { text: newMessage });
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/messages`, { text: newMessage });
         setNewMessage('');
         fetchMessages();
       } catch (error) {
@@ -56,7 +56,7 @@ function Home() {
 
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3001/api/messages/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/messages/${id}`);
       fetchMessages();
     } catch (error) {
       console.error('Error deleting message:', error);
